@@ -1,4 +1,4 @@
-## Katalon Studio export and import test artifacts plugin
+## Katalon Studio Export and Import Test Artifacts Plugin
 
 The main purpose is:
 
