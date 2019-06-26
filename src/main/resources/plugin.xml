@@ -1,0 +1,18 @@
+<plugin>
+    <extension
+            point="com.katalon.platform.extensions">
+        <point
+                id="com.katalon.plugin.katashare.KatasharePluginActivationListener"
+                extensionPointId="com.katalon.platform.api.extension.pluginActivationListener"
+                implementationClass="com.katalon.plugin.katashare.KatasharePluginActivationListener">
+        </point>
+    </extension> 
+    <extension
+   		point="com.katalon.platform.extensions">
+	  <point
+            id="com.katalon.plugin.katashare.PluginMenuItemDescription"
+            extensionPointId="com.katalon.platform.api.extension.newDropdownToolItem"
+            implementationClass="com.katalon.plugin.katashare.PluginMenuItemDescription">
+      </point>	
+   	</extension>
+</plugin>
