@@ -142,6 +142,9 @@ public class ImportTestArtifactHandler {
                 }
             }
         });
+        
+        importArtifactsJob.setUser(true);
+        importArtifactsJob.schedule();
     }
 
     private File importTestCases(File sourceFolder, String testCaseImportLocation) throws IOException {
