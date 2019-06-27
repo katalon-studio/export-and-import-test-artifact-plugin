@@ -8,13 +8,15 @@ public class StringConstants {
     
     public static final String INFO = MessageConstants.INFO;
     
+    public static final String DIALOG_TITLE_EXPORT_TEST_ARTIFACTS = MessageConstants.DIALOG_TITLE_EXPORT_TEST_ARTIFACTS;
+    
     public static final String LBL_SELECT_TEST_CASE = MessageConstants.LBL_SELECT_TEST_CASE;
     
     public static final String LBL_SELECT_TEST_OBJECT = MessageConstants.LBL_SELECT_TEST_OBJECT;
-
-    public static final String COL_TEST_CASE_NUMBER = MessageConstants.COL_TEST_CASE_NUMBER;
     
     public static final String COL_TEST_CASE_ID = MessageConstants.COL_TEST_CASE_ID;
+    
+    public static final String COL_TEST_OBJECT_ID = MessageConstants.COL_TEST_OBJECT_ID;
 
     public static final String TOOL_ITEM_ADD = MessageConstants.TOOL_ITEM_ADD;
     
@@ -29,6 +31,8 @@ public class StringConstants {
     public static final String MSG_UNABLE_TO_EXPORT_TEST_ARTIFACTS = MessageConstants.MSG_UNABLE_TO_EXPORT_TEST_ARTIFACTS;
 
     public static final String MSG_UNABLE_TO_IMPORT_TEST_ARTIFACTS = MessageConstants.MSG_UNABLE_TO_IMPORT_TEST_ARTIFACTS;
+    
+    public static final String DIALOG_TITLE_IMPORT_TEST_ARTIFACTS = MessageConstants.DIALOG_TITLE_IMPORT_TEST_ARTIFACTS;
     
     public static final String LBL_CHOOSE_IMPORT_FILE = MessageConstants.LBL_CHOOSE_IMPORT_FILE;
     
