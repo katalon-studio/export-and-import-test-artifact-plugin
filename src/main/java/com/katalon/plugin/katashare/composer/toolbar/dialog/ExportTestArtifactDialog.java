@@ -169,7 +169,7 @@ public class ExportTestArtifactDialog extends Dialog {
 
         TableViewerColumn tableViewerColumnTestObjectId = new TableViewerColumn(testObjectTableViewer, SWT.LEFT);
         TableColumn tableColumnId = tableViewerColumnTestObjectId.getColumn();
-        tableColumnId.setText(StringConstants.COL_TEST_CASE_ID);
+        tableColumnId.setText(StringConstants.COL_TEST_OBJECT_ID);
         tableViewerColumnTestObjectId.setLabelProvider(new ColumnLabelProvider() {
             @Override
             public String getText(Object element) {
@@ -350,6 +350,12 @@ public class ExportTestArtifactDialog extends Dialog {
     @Override
     protected boolean isResizable() {
         return true;
+    }
+    
+    @Override
+    protected void configureShell(Shell shell) {
+        super.configureShell(shell);
+        shell.setText(StringConstants.DIALOG_TITLE_EXPORT_TEST_ARTIFACTS);
     }
     
     public class ExportTestArtifactDialogResult {

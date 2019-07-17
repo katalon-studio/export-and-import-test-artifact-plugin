@@ -174,6 +174,12 @@ public class ImportTestArtifactDialog extends Dialog {
         super.okPressed();
     }
     
+    @Override
+    protected void configureShell(Shell shell) {
+        super.configureShell(shell);
+        shell.setText(StringConstants.DIALOG_TITLE_IMPORT_TEST_ARTIFACTS);
+    }
+    
     public ImportTestArtifactDialogResult getResult() {
         return dialogResult;
     }
