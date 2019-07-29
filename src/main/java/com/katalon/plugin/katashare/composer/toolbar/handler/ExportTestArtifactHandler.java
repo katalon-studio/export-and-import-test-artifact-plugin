@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,6 +21,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.LoggerFactory;
 
+import com.katalon.platform.api.model.ExecutionProfileEntity;
 import com.katalon.platform.api.model.ProjectEntity;
 import com.katalon.platform.api.model.TestCaseEntity;
 import com.katalon.platform.api.model.TestObjectEntity;
@@ -35,6 +38,8 @@ import com.katalon.plugin.katashare.core.util.ZipUtil;
 import ch.qos.logback.classic.Logger;
 
 public class ExportTestArtifactHandler {
+    
+    private static final long DIALOG_CLOSED_DELAY_MILLIS = 500L;
 
     private Logger logger = (Logger) LoggerFactory.getLogger(ExportTestArtifactHandler.class);
 
@@ -50,9 +55,10 @@ public class ExportTestArtifactHandler {
             ExportTestArtifactDialogResult result = dialog.getResult();
             List<TestCaseEntity> exportedTestCases = result.getSelectedTestCases();
             List<TestObjectEntity> exportedTestObjects = result.getSelectedTestObjects();
+            List<ExecutionProfileEntity> exportedProfiles = result.getSelectedProfiles();
             String exportLocation = result.getExportLocation();
             try {
-                exportTestArtifacts(exportedTestCases, exportedTestObjects, exportLocation);
+                exportTestArtifacts(exportedTestCases, exportedTestObjects, exportedProfiles, exportLocation);
             } catch (Exception e) {
                 MessageDialog.openError(activeShell, StringConstants.ERROR,
                         StringConstants.MSG_UNABLE_TO_EXPORT_TEST_ARTIFACTS);
@@ -62,7 +68,7 @@ public class ExportTestArtifactHandler {
     }
 
     private void exportTestArtifacts(List<TestCaseEntity> testCases, List<TestObjectEntity> testObjects,
-            String exportLocation) throws IOException, FileCompressionException {
+            List<ExecutionProfileEntity> profiles, String exportLocation) throws IOException, FileCompressionException {
 
         File exportFolder = new File(exportLocation);
         if (!exportFolder.exists() || !exportFolder.isDirectory()) {
@@ -79,7 +85,9 @@ public class ExportTestArtifactHandler {
                     SubMonitor subMonitor = SubMonitor.convert(monitor);
                     subMonitor.beginTask("", 100);
                     
-                    int totalWork = testCases.size()*2 + testObjects.size();
+                    int numberOfTestScripts = testCases.size();
+                    
+                    int totalWork = testCases.size() + numberOfTestScripts + testObjects.size() + profiles.size();
                     
                     int exportTestCaseWork = Math.round((float) testCases.size() * 90 / totalWork);
                     SubMonitor exportTestCaseMonitor = subMonitor.split(exportTestCaseWork, SubMonitor.SUPPRESS_NONE);
@@ -104,6 +112,14 @@ public class ExportTestArtifactHandler {
                     exportTestObjects(testObjects, exportTempFolder, exportTestObjectMonitor);
                     
                     exportTestObjectMonitor.done();
+                    
+                    int exportProfileWork = Math.round((float) profiles.size() * 90 / totalWork);
+                    SubMonitor exportProfileMonitor = subMonitor.split(exportProfileWork, SubMonitor.SUPPRESS_NONE);
+                    exportProfileMonitor.beginTask("Exporting profiles...", 100);
+                    
+                    exportProfiles(profiles, exportTempFolder, exportProfileMonitor);
+                    
+                    exportProfileMonitor.done();
 
                     SubMonitor zipMonitor = subMonitor.split(10, SubMonitor.SUPPRESS_NONE);
                     zipMonitor.beginTask("Compressing files...",  100);
@@ -129,12 +145,22 @@ public class ExportTestArtifactHandler {
         exportArtifactsJob.addJobChangeListener(new JobChangeAdapter() {
             @Override
             public void done(IJobChangeEvent event) {
-                if (exportArtifactsJob.getResult().isOK()) {
+                if (!exportArtifactsJob.getResult().isOK()) {
+                    logger.error("Failed to export test artifacts");
+                    MessageDialog.openError(activeShell, StringConstants.ERROR,
+                            StringConstants.MSG_FAILED_TO_EXPORT_TEST_ARTIFACTS);
+                }
+
+                Executors.newSingleThreadExecutor().submit(() -> {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(DIALOG_CLOSED_DELAY_MILLIS);
+                    } catch (InterruptedException ignored) {
+                    }
                     PlatformUtil.getUIService(UISynchronizeService.class).syncExec(() -> {
                         MessageDialog.openInformation(activeShell, StringConstants.INFO,
                                 StringConstants.MSG_TEST_ARTIFACTS_EXPORTED_SUCCESSFULLY);
                     });
-                }
+                });
             }
         });
 
@@ -214,6 +240,22 @@ public class ExportTestArtifactHandler {
             
             progress++;
             monitor.worked(Math.round((float) progress * 100 / testObjects.size()));
+        }
+    }
+    
+    private void exportProfiles(List<ExecutionProfileEntity> profiles, File exportFolder, SubMonitor monitor) throws IOException {
+        File sharedProfileFolder = new File(exportFolder, "Shared-Profiles");
+        sharedProfileFolder.mkdirs();
+        
+        int progress = 0;
+        for (ExecutionProfileEntity profile : profiles) {
+            File profileFile = new File(profile.getFileLocation());
+            if (profileFile.exists()) {
+                FileUtils.copyFileToDirectory(profileFile, sharedProfileFolder);
+            }
+            
+            progress++;
+            monitor.worked(Math.round((float) progress * 100 / profiles.size()));
         }
     }
 }

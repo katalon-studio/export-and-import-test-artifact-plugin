@@ -16,15 +16,19 @@ public class MessageConstants {
     
     public static String DIALOG_TITLE_EXPORT_TEST_ARTIFACTS;
     
-    public static String LBL_SELECT_TEST_CASE;
+    public static String LBL_TEST_CASE;
     
-    public static String LBL_SELECT_TEST_OBJECT;
+    public static String LBL_TEST_OBJECT;
+    
+    public static String LBL_PROFILE;
     
     public static String COL_TEST_CASE_NUMBER;
     
     public static String COL_TEST_CASE_ID;
     
     public static String COL_TEST_OBJECT_ID;
+    
+    public static String COL_PROFILE_ID;
     
     public static String TOOL_ITEM_ADD;
     
@@ -57,4 +61,8 @@ public class MessageConstants {
     public static String MSG_TEST_ARTIFACTS_EXPORTED_SUCCESSFULLY;
     
     public static String MSG_TEST_ARTIFACTS_IMPORTED_SUCCESSFULLY;
+    
+    public static String MSG_FAILED_TO_EXPORT_TEST_ARTIFACTS;
+    
+    public static String MSG_FAILED_TO_IMPORT_TEST_ARTIFACTS;
 }
