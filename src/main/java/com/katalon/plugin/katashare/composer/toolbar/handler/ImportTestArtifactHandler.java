@@ -24,7 +24,11 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.LoggerFactory;
 
+import com.katalon.platform.api.controller.FolderController;
+import com.katalon.platform.api.exception.ResourceException;
+import com.katalon.platform.api.model.FolderEntity;
 import com.katalon.platform.api.model.ProjectEntity;
+import com.katalon.platform.api.ui.TestExplorerActionService;
 import com.katalon.platform.api.ui.UISynchronizeService;
 import com.katalon.plugin.katashare.composer.toolbar.dialog.ImportTestArtifactDialog;
 import com.katalon.plugin.katashare.composer.toolbar.dialog.ImportTestArtifactDialog.ImportTestArtifactDialogResult;
@@ -41,7 +45,7 @@ import com.katalon.plugin.katashare.core.util.ZipUtil;
 import ch.qos.logback.classic.Logger;
 
 public class ImportTestArtifactHandler {
-    
+
     private static final long DIALOG_CLOSED_DELAY_MILLIS = 500L;
 
     private Logger logger = (Logger) LoggerFactory.getLogger(ImportTestArtifactHandler.class);
@@ -51,6 +55,7 @@ public class ImportTestArtifactHandler {
     public ImportTestArtifactHandler(Shell shell) {
         this.activeShell = shell;
     }
+
     public void execute() {
         ImportTestArtifactDialog dialog = new ImportTestArtifactDialog(activeShell);
         if (dialog.open() == Window.OK) {
@@ -94,35 +99,37 @@ public class ImportTestArtifactHandler {
                 try {
                     File tempFolder = Files.createTempDirectory("import-test-artifacts-").toFile();
                     ZipUtil.extractAll(importFile, tempFolder);
-    
+
                     if (!FileUtil.isEmptyFolder(tempFolder)) {
                         File sourceFolder = tempFolder.listFiles()[0];
                         if (sourceFolder.isDirectory()) {
                             File testCaseImportFolder = null;
                             File testScriptImportFolder = null;
                             File testObjectImportFolder = null;
-    
+
                             testCaseImportFolder = importTestCases(sourceFolder, testCaseImportLocation);
-    
+
                             if (testCaseImportFolder != null) {
                                 testScriptImportFolder = importTestScripts(sourceFolder, testCaseImportFolder);
                             }
-    
+
                             testObjectImportFolder = importTestObjects(sourceFolder, testObjectImportLocation);
-    
+
                             importProfiles(sourceFolder);
-                            
+
                             if (testObjectImportFolder != null && testScriptImportFolder != null) {
                                 Map<String, String> testObjectIdLookup = collectTestObjectIds(testObjectImportFolder);
-                                List<File> scriptFiles = FileUtil.listFilesWithExtension(testScriptImportFolder, "groovy");
+                                List<File> scriptFiles = FileUtil.listFilesWithExtension(testScriptImportFolder,
+                                        "groovy");
                                 TestArtifactScriptRefactor refactor = TestArtifactScriptRefactor
                                         .createForTestObjectEntity(testObjectIdLookup);
                                 refactor.updateReferences(scriptFiles);
                             }
-    
+
                             if (testCaseImportFolder != null && testScriptImportFolder != null) {
                                 Map<String, String> testCaseIdLookup = collectTestCaseIds(testCaseImportFolder);
-                                List<File> scriptFiles = FileUtil.listFilesWithExtension(testScriptImportFolder, "groovy");
+                                List<File> scriptFiles = FileUtil.listFilesWithExtension(testScriptImportFolder,
+                                        "groovy");
                                 TestArtifactScriptRefactor refactor = TestArtifactScriptRefactor
                                         .createForTestCaseEntity(testCaseIdLookup);
                                 refactor.updateReferences(scriptFiles);
@@ -137,15 +144,16 @@ public class ImportTestArtifactHandler {
                 return Status.OK_STATUS;
             }
         };
-        
+
         importArtifactsJob.addJobChangeListener(new JobChangeAdapter() {
             @Override
             public void done(IJobChangeEvent event) {
                 if (!importArtifactsJob.getResult().isOK()) {
                     logger.error("Failed to import test artifacts!");
-                    MessageDialog.openError(activeShell, StringConstants.ERROR, StringConstants.MSG_FAILED_TO_IMPORT_TEST_ARTIFACTS);
+                    MessageDialog.openError(activeShell, StringConstants.ERROR,
+                            StringConstants.MSG_FAILED_TO_IMPORT_TEST_ARTIFACTS);
                 }
-                
+
                 Executors.newSingleThreadExecutor().submit(() -> {
                     try {
                         TimeUnit.MILLISECONDS.sleep(DIALOG_CLOSED_DELAY_MILLIS);
@@ -158,7 +166,7 @@ public class ImportTestArtifactHandler {
                 });
             }
         });
-        
+
         importArtifactsJob.setUser(true);
         importArtifactsJob.schedule();
     }
@@ -168,8 +176,8 @@ public class ImportTestArtifactHandler {
         if (!FileUtil.isEmptyFolder(sharedTestCaseFolder)) {
             ProjectEntity project = PlatformUtil.getCurrentProject();
 
-            String importFolderRelativePath = StringUtils.replace(testCaseImportLocation, EntityUtil.getEntityIdSeparator(),
-                    File.separator);
+            String importFolderRelativePath = StringUtils.replace(testCaseImportLocation,
+                    EntityUtil.getEntityIdSeparator(), File.separator);
             File importFolder = new File(project.getFolderLocation(), importFolderRelativePath);
 
             FileUtils.copyDirectory(sharedTestCaseFolder, importFolder);
@@ -180,7 +188,7 @@ public class ImportTestArtifactHandler {
         }
     }
 
-    private File importTestScripts(File sourceFolder, File testCaseImportFolder) throws IOException {
+    private File importTestScripts(File sourceFolder, File testCaseImportFolder) throws IOException, ResourceException {
         File sharedTestScriptFolder = new File(sourceFolder, "shared-test-scripts");
         if (!FileUtil.isEmptyFolder(sharedTestScriptFolder)) {
             ProjectEntity project = PlatformUtil.getCurrentProject();
@@ -193,37 +201,58 @@ public class ImportTestArtifactHandler {
 
             FileUtils.copyDirectory(sharedTestScriptFolder, importFolder);
 
+            String importFolderId = "Test Cases" + EntityUtil.getEntityIdSeparator()
+                    + StringUtils.replace(importFolderRelativePath, File.separator, EntityUtil.getEntityIdSeparator());
+            FolderEntity importFolderEntity = PlatformUtil.getPlatformController(FolderController.class)
+                    .getFolder(project, importFolderId);
+            TestExplorerActionService explorerActionService = PlatformUtil
+                    .getUIService(TestExplorerActionService.class);
+            explorerActionService.refreshFolder(project, importFolderEntity);
+
             return importFolder;
         } else {
             return null;
         }
     }
 
-    private File importTestObjects(File sourceFolder, String testObjectImportLocation) throws IOException {
+    private File importTestObjects(File sourceFolder, String testObjectImportLocation)
+            throws IOException, ResourceException {
         File sharedTestObjectFolder = new File(sourceFolder, "shared-test-objects");
         if (!FileUtil.isEmptyFolder(sharedTestObjectFolder)) {
             ProjectEntity project = PlatformUtil.getCurrentProject();
 
-            String importFolderRelativePath = StringUtils.replace(testObjectImportLocation, EntityUtil.getEntityIdSeparator(),
-                    File.separator);
+            String importFolderRelativePath = StringUtils.replace(testObjectImportLocation,
+                    EntityUtil.getEntityIdSeparator(), File.separator);
             File importFolder = new File(project.getFolderLocation(), importFolderRelativePath);
 
             FileUtils.copyDirectory(sharedTestObjectFolder, importFolder);
+
+            FolderEntity importFolderEntity = PlatformUtil.getPlatformController(FolderController.class)
+                    .getFolder(project, testObjectImportLocation);
+            TestExplorerActionService explorerActionService = PlatformUtil
+                    .getUIService(TestExplorerActionService.class);
+            explorerActionService.refreshFolder(project, importFolderEntity);
 
             return importFolder;
         } else {
             return null;
         }
     }
-    
-    private void importProfiles(File sourceFolder) throws IOException {
+
+    private void importProfiles(File sourceFolder) throws IOException, ResourceException {
         File sharedProfileFolder = new File(sourceFolder, "shared-profiles");
         if (!FileUtil.isEmptyFolder(sharedProfileFolder)) {
             ProjectEntity project = PlatformUtil.getCurrentProject();
-            
+
             File profileRootFolder = new File(ProfileUtil.getProfileRootFolder(project));
-            
+
             FileUtils.copyDirectory(sharedProfileFolder, profileRootFolder);
+
+            FolderEntity importFolderEntity = PlatformUtil.getPlatformController(FolderController.class)
+                    .getFolder(project, "Profiles");
+            TestExplorerActionService explorerActionService = PlatformUtil
+                    .getUIService(TestExplorerActionService.class);
+            explorerActionService.refreshFolder(project, importFolderEntity);
         }
     }
 
