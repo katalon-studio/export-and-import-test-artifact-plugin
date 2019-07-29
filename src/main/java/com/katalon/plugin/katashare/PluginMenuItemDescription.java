@@ -36,7 +36,7 @@ public class PluginMenuItemDescription implements ToolItemWithMenuDescription {
         menu = new Menu(parent);
         
         MenuItem exportTestArtifactMenuItem = new MenuItem(menu, SWT.PUSH);
-        exportTestArtifactMenuItem.setText("Export Test Cases and Test Objects");
+        exportTestArtifactMenuItem.setText("Export Test Artifacts");
         exportTestArtifactMenuItem.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -46,7 +46,7 @@ public class PluginMenuItemDescription implements ToolItemWithMenuDescription {
         });
         
         MenuItem importTestArtifactMenuItem = new MenuItem(menu, SWT.PUSH);
-        importTestArtifactMenuItem.setText("Import Test Cases and Test Objects");
+        importTestArtifactMenuItem.setText("Import Test Artifacts");
         importTestArtifactMenuItem.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {

@@ -20,11 +20,15 @@ public class MessageConstants {
     
     public static String LBL_SELECT_TEST_OBJECT;
     
+    public static String LBL_PROFILE;
+    
     public static String COL_TEST_CASE_NUMBER;
     
     public static String COL_TEST_CASE_ID;
     
     public static String COL_TEST_OBJECT_ID;
+    
+    public static String COL_PROFILE_ID;
     
     public static String TOOL_ITEM_ADD;
     

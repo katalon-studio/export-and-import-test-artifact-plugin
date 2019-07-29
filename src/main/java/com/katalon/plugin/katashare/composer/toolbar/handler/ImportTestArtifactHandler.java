@@ -32,6 +32,7 @@ import com.katalon.plugin.katashare.core.TestArtifactScriptRefactor;
 import com.katalon.plugin.katashare.core.util.EntityUtil;
 import com.katalon.plugin.katashare.core.util.FileUtil;
 import com.katalon.plugin.katashare.core.util.PlatformUtil;
+import com.katalon.plugin.katashare.core.util.ProfileUtil;
 import com.katalon.plugin.katashare.core.util.TestCaseUtil;
 import com.katalon.plugin.katashare.core.util.ZipUtil;
 
@@ -105,6 +106,8 @@ public class ImportTestArtifactHandler {
     
                             testObjectImportFolder = importTestObjects(sourceFolder, testObjectImportLocation);
     
+                            importProfiles(sourceFolder);
+                            
                             if (testObjectImportFolder != null && testScriptImportFolder != null) {
                                 Map<String, String> testObjectIdLookup = collectTestObjectIds(testObjectImportFolder);
                                 List<File> scriptFiles = FileUtil.listFilesWithExtension(testScriptImportFolder, "groovy");
@@ -205,6 +208,17 @@ public class ImportTestArtifactHandler {
             return importFolder;
         } else {
             return null;
+        }
+    }
+    
+    private void importProfiles(File sourceFolder) throws IOException {
+        File sharedProfileFolder = new File(sourceFolder, "shared-profiles");
+        if (!FileUtil.isEmptyFolder(sharedProfileFolder)) {
+            ProjectEntity project = PlatformUtil.getCurrentProject();
+            
+            File profileRootFolder = new File(ProfileUtil.getProfileRootFolder(project));
+            
+            FileUtils.copyDirectory(sharedProfileFolder, profileRootFolder);
         }
     }
 
