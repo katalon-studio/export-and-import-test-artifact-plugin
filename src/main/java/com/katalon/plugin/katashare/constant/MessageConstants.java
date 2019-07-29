@@ -61,4 +61,8 @@ public class MessageConstants {
     public static String MSG_TEST_ARTIFACTS_EXPORTED_SUCCESSFULLY;
     
     public static String MSG_TEST_ARTIFACTS_IMPORTED_SUCCESSFULLY;
+    
+    public static String MSG_FAILED_TO_EXPORT_TEST_ARTIFACTS;
+    
+    public static String MSG_FAILED_TO_IMPORT_TEST_ARTIFACTS;
 }
