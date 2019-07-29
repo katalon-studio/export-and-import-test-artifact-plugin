@@ -198,8 +198,8 @@ public class ExportTestArtifactDialog extends Dialog {
     }
     
     private void createProfileSelectionSection(Composite parent) {
-        Label lblSelectProfile = new Label(parent, SWT.NONE);
-        lblSelectProfile.setText(StringConstants.LBL_SELECT_PROFILES);
+        Label lblProfile = new Label(parent, SWT.NONE);
+        lblProfile.setText(StringConstants.LBL_PROFILE);
 
         ToolBar toolBar = new ToolBar(parent, SWT.FLAT | SWT.WRAP | SWT.RIGHT);
         toolBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));

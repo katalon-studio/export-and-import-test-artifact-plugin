@@ -14,7 +14,7 @@ public class StringConstants {
     
     public static final String LBL_SELECT_TEST_OBJECT = MessageConstants.LBL_SELECT_TEST_OBJECT;
     
-    public static final String LBL_SELECT_PROFILES = MessageConstants.LBL_SELECT_PROFILES;
+    public static final String LBL_PROFILE = MessageConstants.LBL_PROFILE;
     
     public static final String COL_TEST_CASE_ID = MessageConstants.COL_TEST_CASE_ID;
     

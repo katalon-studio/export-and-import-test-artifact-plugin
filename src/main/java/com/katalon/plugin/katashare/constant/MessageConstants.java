@@ -20,7 +20,7 @@ public class MessageConstants {
     
     public static String LBL_SELECT_TEST_OBJECT;
     
-    public static String LBL_SELECT_PROFILES;
+    public static String LBL_PROFILE;
     
     public static String COL_TEST_CASE_NUMBER;
     
