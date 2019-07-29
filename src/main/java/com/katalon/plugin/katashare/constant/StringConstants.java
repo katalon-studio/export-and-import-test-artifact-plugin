@@ -10,9 +10,9 @@ public class StringConstants {
     
     public static final String DIALOG_TITLE_EXPORT_TEST_ARTIFACTS = MessageConstants.DIALOG_TITLE_EXPORT_TEST_ARTIFACTS;
     
-    public static final String LBL_SELECT_TEST_CASE = MessageConstants.LBL_SELECT_TEST_CASE;
+    public static final String LBL_TEST_CASE = MessageConstants.LBL_TEST_CASE;
     
-    public static final String LBL_SELECT_TEST_OBJECT = MessageConstants.LBL_SELECT_TEST_OBJECT;
+    public static final String LBL_TEST_OBJECT = MessageConstants.LBL_TEST_OBJECT;
     
     public static final String LBL_PROFILE = MessageConstants.LBL_PROFILE;
     
