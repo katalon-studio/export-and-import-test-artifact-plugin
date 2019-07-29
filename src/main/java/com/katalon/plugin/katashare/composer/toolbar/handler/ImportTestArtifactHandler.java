@@ -7,6 +7,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -38,6 +40,8 @@ import com.katalon.plugin.katashare.core.util.ZipUtil;
 import ch.qos.logback.classic.Logger;
 
 public class ImportTestArtifactHandler {
+    
+    private static final long DIALOG_CLOSED_DELAY_MILLIS = 500L;
 
     private Logger logger = (Logger) LoggerFactory.getLogger(ImportTestArtifactHandler.class);
 
@@ -134,12 +138,21 @@ public class ImportTestArtifactHandler {
         importArtifactsJob.addJobChangeListener(new JobChangeAdapter() {
             @Override
             public void done(IJobChangeEvent event) {
-                if (importArtifactsJob.getResult().isOK()) {
+                if (!importArtifactsJob.getResult().isOK()) {
+                    logger.error("Failed to import test artifacts!");
+                    MessageDialog.openError(activeShell, StringConstants.ERROR, StringConstants.MSG_FAILED_TO_IMPORT_TEST_ARTIFACTS);
+                }
+                
+                Executors.newSingleThreadExecutor().submit(() -> {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(DIALOG_CLOSED_DELAY_MILLIS);
+                    } catch (InterruptedException ignored) {
+                    }
                     PlatformUtil.getUIService(UISynchronizeService.class).syncExec(() -> {
                         MessageDialog.openInformation(activeShell, StringConstants.INFO,
                                 StringConstants.MSG_TEST_ARTIFACTS_IMPORTED_SUCCESSFULLY);
                     });
-                }
+                });
             }
         });
         

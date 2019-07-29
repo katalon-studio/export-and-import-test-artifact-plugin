@@ -49,4 +49,8 @@ public class StringConstants {
     public static final String MSG_TEST_ARTIFACTS_EXPORTED_SUCCESSFULLY = MessageConstants.MSG_TEST_ARTIFACTS_EXPORTED_SUCCESSFULLY;
     
     public static final String MSG_TEST_ARTIFACTS_IMPORTED_SUCCESSFULLY = MessageConstants.MSG_TEST_ARTIFACTS_IMPORTED_SUCCESSFULLY;
+    
+    public static final String MSG_FAILED_TO_EXPORT_TEST_ARTIFACTS = MessageConstants.MSG_FAILED_TO_EXPORT_TEST_ARTIFACTS;
+    
+    public static final String MSG_FAILED_TO_IMPORT_TEST_ARTIFACTS = MessageConstants.MSG_FAILED_TO_IMPORT_TEST_ARTIFACTS;
 }
