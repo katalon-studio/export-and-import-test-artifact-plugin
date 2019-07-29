@@ -114,7 +114,7 @@ public class ExportTestArtifactDialog extends Dialog {
         testCaseTableComposite.setLayoutData(gdTestCaseTableComposite);
         testCaseTableComposite.setLayout(new FillLayout());
 
-        testCaseTableViewer = new TableViewer(testCaseTableComposite, SWT.BORDER);
+        testCaseTableViewer = new TableViewer(testCaseTableComposite, SWT.BORDER | SWT.MULTI);
         testCaseTableViewer.setContentProvider(ArrayContentProvider.getInstance());
         Table testCaseTable = testCaseTableViewer.getTable();
         testCaseTable.setHeaderVisible(true);
@@ -161,7 +161,7 @@ public class ExportTestArtifactDialog extends Dialog {
         testObjectTableComposite.setLayoutData(gdtestObjectTableComposite);
         testObjectTableComposite.setLayout(new FillLayout());
 
-        testObjectTableViewer = new TableViewer(testObjectTableComposite, SWT.BORDER);
+        testObjectTableViewer = new TableViewer(testObjectTableComposite, SWT.BORDER | SWT.MULTI);
         testObjectTableViewer.setContentProvider(ArrayContentProvider.getInstance());
         Table testObjectTable = testObjectTableViewer.getTable();
         testObjectTable.setHeaderVisible(true);
