@@ -14,6 +14,8 @@ import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -37,6 +39,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import com.katalon.platform.api.exception.PlatformException;
+import com.katalon.platform.api.model.ExecutionProfileEntity;
 import com.katalon.platform.api.model.TestCaseEntity;
 import com.katalon.platform.api.model.TestObjectEntity;
 import com.katalon.platform.api.ui.DialogActionService;
@@ -49,6 +52,8 @@ public class ExportTestArtifactDialog extends Dialog {
     private List<TestCaseEntity> selectedTestCases = new ArrayList<>();
 
     private List<TestObjectEntity> selectedTestObjects = new ArrayList<>();
+    
+    private List<ExecutionProfileEntity> selectedProfiles = new ArrayList<>();
 
     private TableViewer testCaseTableViewer;
 
@@ -61,6 +66,12 @@ public class ExportTestArtifactDialog extends Dialog {
     private ToolItem btnAddTestObject;
 
     private ToolItem btnDeleteTestObject;
+    
+    private TableViewer profileTableViewer;
+    
+    private ToolItem btnAddProfile;
+    
+    private ToolItem btnDeleteProfile;
     
     private Text txtExportLocation;
     
@@ -84,6 +95,8 @@ public class ExportTestArtifactDialog extends Dialog {
         createTestCaseSelectionSection(body);
 
         createTestObjectSelectionSection(body);
+        
+        createProfileSelectionSection(body);
         
         createExportLocationSection(body);
 
@@ -186,6 +199,53 @@ public class ExportTestArtifactDialog extends Dialog {
         testObjectTableViewer.refresh();
     }
     
+    private void createProfileSelectionSection(Composite parent) {
+        Label lblProfile = new Label(parent, SWT.NONE);
+        lblProfile.setText(StringConstants.LBL_PROFILE);
+
+        ToolBar toolBar = new ToolBar(parent, SWT.FLAT | SWT.WRAP | SWT.RIGHT);
+        toolBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+        btnAddProfile = new ToolItem(toolBar, SWT.FLAT);
+        btnAddProfile.setText(StringConstants.TOOL_ITEM_ADD);
+        btnAddProfile.setImage(ImageConstants.IMG_16_ADD);
+
+        btnDeleteProfile = new ToolItem(toolBar, SWT.FLAT);
+        btnDeleteProfile.setText(StringConstants.TOOL_ITEM_DELETE);
+        btnDeleteProfile.setImage(ImageConstants.IMG_16_DELETE);
+        btnDeleteProfile.setEnabled(false);
+
+        Composite profileTableComposite = new Composite(parent, SWT.NONE);
+        GridData gdProfileTableComposite = new GridData(SWT.FILL, SWT.FILL, true, true);
+        gdProfileTableComposite.heightHint = 200;
+        profileTableComposite.setLayoutData(gdProfileTableComposite);
+        profileTableComposite.setLayout(new FillLayout());
+
+        profileTableViewer = new TableViewer(profileTableComposite, SWT.BORDER | SWT.MULTI);
+        profileTableViewer.setContentProvider(ArrayContentProvider.getInstance());
+        Table profileTable = profileTableViewer.getTable();
+        profileTable.setHeaderVisible(true);
+        profileTable.setLinesVisible(true);
+
+        TableViewerColumn tableViewerColumnProfileId = new TableViewerColumn(profileTableViewer, SWT.LEFT);
+        TableColumn tableColumnId = tableViewerColumnProfileId.getColumn();
+        tableColumnId.setText(StringConstants.COL_PROFILE_ID);
+        tableViewerColumnProfileId.setLabelProvider(new ColumnLabelProvider() {
+            @Override
+            public String getText(Object element) {
+                ExecutionProfileEntity profile = (ExecutionProfileEntity) element;
+                return profile.getId();
+            }
+        });
+
+        TableColumnLayout profileTableLayout = new TableColumnLayout();
+        profileTableLayout.setColumnData(tableColumnId, new ColumnWeightData(100, 30));
+        profileTableComposite.setLayout(profileTableLayout);
+
+        profileTableViewer.setInput(selectedProfiles);
+        profileTableViewer.refresh();
+    }
+    
     private void createExportLocationSection(Composite parent) {
         Composite composite = new Composite(parent, SWT.NONE);
         GridLayout glComposite = new GridLayout(1, false);
@@ -284,6 +344,49 @@ public class ExportTestArtifactDialog extends Dialog {
             }
         });
         
+        btnAddProfile.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                Shell activeShell = e.widget.getDisplay().getActiveShell();
+                try {
+                    ExecutionProfileEntity[] profileEntities = PlatformUtil.getUIService(DialogActionService.class)
+                            .showExecutionProfileSelectionDialog(activeShell, "Select profiles");
+                    selectedProfiles.addAll(Arrays.asList(profileEntities));
+                    profileTableViewer.refresh();
+                } catch (PlatformException ex) {
+                    MessageDialog.openError(activeShell, StringConstants.ERROR, ex.getMessage());
+                }
+                validateInput();
+            }
+        });
+        
+        btnDeleteProfile.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                Object[] selections = profileTableViewer.getStructuredSelection().toArray();
+                for (Object profile : selections) {
+                    selectedProfiles.remove((ExecutionProfileEntity) profile);
+                }
+                profileTableViewer.refresh();
+                if (selectedProfiles.isEmpty()) {
+                    btnDeleteProfile.setEnabled(false);
+                }
+                validateInput();
+            }
+        });
+        
+        profileTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+            @Override
+            public void selectionChanged(SelectionChangedEvent event) {
+                Object[] selections = profileTableViewer.getStructuredSelection().toArray();
+                if (selections != null && selections.length > 0) {
+                    btnDeleteProfile.setEnabled(true);
+                } else {
+                    btnDeleteProfile.setEnabled(false);
+                }
+            }
+        });
+        
         btnChooseExportFolder.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -300,13 +403,12 @@ public class ExportTestArtifactDialog extends Dialog {
             public void modifyText(ModifyEvent arg0) {
                 validateInput();
             }
-            
         });
     }
     
     private void validateInput() {
-        boolean isValid = (!selectedTestCases.isEmpty() || !selectedTestObjects.isEmpty()) 
-                && StringUtils.isNotBlank(txtExportLocation.getText());
+        boolean isValid = (!selectedTestCases.isEmpty() || !selectedTestObjects.isEmpty()
+                || !selectedProfiles.isEmpty()) && StringUtils.isNotBlank(txtExportLocation.getText());
         getButton(IDialogConstants.OK_ID).setEnabled(isValid);
     }
 
@@ -315,6 +417,7 @@ public class ExportTestArtifactDialog extends Dialog {
         dialogResult = new ExportTestArtifactDialogResult();
         dialogResult.setSelectedTestCases(filterDuplicatedTestCases(selectedTestCases));
         dialogResult.setSelectedTestObjects(filterDuplicatedTestObjects(selectedTestObjects));
+        dialogResult.setSelectedProfiles(filterDuplicatedProfiles(selectedProfiles));
         dialogResult.setExportLocation(txtExportLocation.getText());
         super.okPressed();
     }
@@ -343,6 +446,18 @@ public class ExportTestArtifactDialog extends Dialog {
         return filteredResult;
     }
     
+    private List<ExecutionProfileEntity> filterDuplicatedProfiles(List<ExecutionProfileEntity> profiles) {
+        Set<String> profileIds = new HashSet<>();
+        List<ExecutionProfileEntity> filteredResult = new ArrayList<>();
+        for (ExecutionProfileEntity profile : profiles) {
+            if (!profileIds.contains(profile.getId())) {
+                filteredResult.add(profile);
+                profileIds.add(profile.getId());
+            }
+        }
+        return filteredResult;
+    }
+    
     public ExportTestArtifactDialogResult getResult() {
         return dialogResult;
     }
@@ -363,6 +478,8 @@ public class ExportTestArtifactDialog extends Dialog {
         
         private List<TestObjectEntity> selectedTestObjects;
         
+        private List<ExecutionProfileEntity> selectedProfiles;
+        
         private String exportLocation;
 
         public List<TestCaseEntity> getSelectedTestCases() {
@@ -379,6 +496,14 @@ public class ExportTestArtifactDialog extends Dialog {
 
         public void setSelectedTestObjects(List<TestObjectEntity> selectedTestObjects) {
             this.selectedTestObjects = selectedTestObjects;
+        }
+
+        public List<ExecutionProfileEntity> getSelectedProfiles() {
+            return selectedProfiles;
+        }
+
+        public void setSelectedProfiles(List<ExecutionProfileEntity> selectedProfiles) {
+            this.selectedProfiles = selectedProfiles;
         }
 
         public String getExportLocation() {

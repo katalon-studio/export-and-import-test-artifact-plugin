@@ -32,6 +32,7 @@ import com.katalon.plugin.katashare.core.TestArtifactScriptRefactor;
 import com.katalon.plugin.katashare.core.util.EntityUtil;
 import com.katalon.plugin.katashare.core.util.FileUtil;
 import com.katalon.plugin.katashare.core.util.PlatformUtil;
+import com.katalon.plugin.katashare.core.util.ProfileUtil;
 import com.katalon.plugin.katashare.core.util.TestCaseUtil;
 import com.katalon.plugin.katashare.core.util.ZipUtil;
 
@@ -105,6 +106,8 @@ public class ImportTestArtifactHandler {
     
                             testObjectImportFolder = importTestObjects(sourceFolder, testObjectImportLocation);
     
+                            importProfiles(sourceFolder);
+                            
                             if (testObjectImportFolder != null && testScriptImportFolder != null) {
                                 Map<String, String> testObjectIdLookup = collectTestObjectIds(testObjectImportFolder);
                                 List<File> scriptFiles = FileUtil.listFilesWithExtension(testScriptImportFolder, "groovy");
@@ -152,13 +155,9 @@ public class ImportTestArtifactHandler {
         if (!FileUtil.isEmptyFolder(sharedTestCaseFolder)) {
             ProjectEntity project = PlatformUtil.getCurrentProject();
 
-            String parentRelativePath = StringUtils.replace(testCaseImportLocation, EntityUtil.getEntityIdSeparator(),
+            String importFolderRelativePath = StringUtils.replace(testCaseImportLocation, EntityUtil.getEntityIdSeparator(),
                     File.separator);
-            File parentFolder = new File(project.getFolderLocation(), parentRelativePath);
-
-            String importFolderName = FileUtil.getAvailableFolderName(parentFolder, "shared");
-            File importFolder = new File(parentFolder, importFolderName);
-            importFolder.mkdirs();
+            File importFolder = new File(project.getFolderLocation(), importFolderRelativePath);
 
             FileUtils.copyDirectory(sharedTestCaseFolder, importFolder);
 
@@ -192,19 +191,26 @@ public class ImportTestArtifactHandler {
         if (!FileUtil.isEmptyFolder(sharedTestObjectFolder)) {
             ProjectEntity project = PlatformUtil.getCurrentProject();
 
-            String parentRelativePath = StringUtils.replace(testObjectImportLocation, EntityUtil.getEntityIdSeparator(),
+            String importFolderRelativePath = StringUtils.replace(testObjectImportLocation, EntityUtil.getEntityIdSeparator(),
                     File.separator);
-            File parentFolder = new File(project.getFolderLocation(), parentRelativePath);
-
-            String importFolderName = FileUtil.getAvailableFolderName(parentFolder, "shared");
-            File importFolder = new File(parentFolder, importFolderName);
-            importFolder.mkdirs();
+            File importFolder = new File(project.getFolderLocation(), importFolderRelativePath);
 
             FileUtils.copyDirectory(sharedTestObjectFolder, importFolder);
 
             return importFolder;
         } else {
             return null;
+        }
+    }
+    
+    private void importProfiles(File sourceFolder) throws IOException {
+        File sharedProfileFolder = new File(sourceFolder, "shared-profiles");
+        if (!FileUtil.isEmptyFolder(sharedProfileFolder)) {
+            ProjectEntity project = PlatformUtil.getCurrentProject();
+            
+            File profileRootFolder = new File(ProfileUtil.getProfileRootFolder(project));
+            
+            FileUtils.copyDirectory(sharedProfileFolder, profileRootFolder);
         }
     }
 
