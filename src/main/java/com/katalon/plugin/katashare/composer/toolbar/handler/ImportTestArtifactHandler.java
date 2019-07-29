@@ -155,13 +155,9 @@ public class ImportTestArtifactHandler {
         if (!FileUtil.isEmptyFolder(sharedTestCaseFolder)) {
             ProjectEntity project = PlatformUtil.getCurrentProject();
 
-            String parentRelativePath = StringUtils.replace(testCaseImportLocation, EntityUtil.getEntityIdSeparator(),
+            String importFolderRelativePath = StringUtils.replace(testCaseImportLocation, EntityUtil.getEntityIdSeparator(),
                     File.separator);
-            File parentFolder = new File(project.getFolderLocation(), parentRelativePath);
-
-            String importFolderName = FileUtil.getAvailableFolderName(parentFolder, "shared");
-            File importFolder = new File(parentFolder, importFolderName);
-            importFolder.mkdirs();
+            File importFolder = new File(project.getFolderLocation(), importFolderRelativePath);
 
             FileUtils.copyDirectory(sharedTestCaseFolder, importFolder);
 
@@ -195,13 +191,9 @@ public class ImportTestArtifactHandler {
         if (!FileUtil.isEmptyFolder(sharedTestObjectFolder)) {
             ProjectEntity project = PlatformUtil.getCurrentProject();
 
-            String parentRelativePath = StringUtils.replace(testObjectImportLocation, EntityUtil.getEntityIdSeparator(),
+            String importFolderRelativePath = StringUtils.replace(testObjectImportLocation, EntityUtil.getEntityIdSeparator(),
                     File.separator);
-            File parentFolder = new File(project.getFolderLocation(), parentRelativePath);
-
-            String importFolderName = FileUtil.getAvailableFolderName(parentFolder, "shared");
-            File importFolder = new File(parentFolder, importFolderName);
-            importFolder.mkdirs();
+            File importFolder = new File(project.getFolderLocation(), importFolderRelativePath);
 
             FileUtils.copyDirectory(sharedTestObjectFolder, importFolder);
 
