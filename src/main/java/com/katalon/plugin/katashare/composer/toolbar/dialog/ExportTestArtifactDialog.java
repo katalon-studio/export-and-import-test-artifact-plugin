@@ -14,6 +14,8 @@ import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -350,9 +352,6 @@ public class ExportTestArtifactDialog extends Dialog {
                     ExecutionProfileEntity[] profileEntities = PlatformUtil.getUIService(DialogActionService.class)
                             .showExecutionProfileSelectionDialog(activeShell, "Select profiles");
                     selectedProfiles.addAll(Arrays.asList(profileEntities));
-                    if (selectedProfiles.size() > 0) {
-                        btnDeleteProfile.setEnabled(true);
-                    }
                     profileTableViewer.refresh();
                 } catch (PlatformException ex) {
                     MessageDialog.openError(activeShell, StringConstants.ERROR, ex.getMessage());
@@ -373,6 +372,18 @@ public class ExportTestArtifactDialog extends Dialog {
                     btnDeleteProfile.setEnabled(false);
                 }
                 validateInput();
+            }
+        });
+        
+        profileTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+            @Override
+            public void selectionChanged(SelectionChangedEvent event) {
+                Object[] selections = profileTableViewer.getStructuredSelection().toArray();
+                if (selections != null && selections.length > 0) {
+                    btnDeleteProfile.setEnabled(true);
+                } else {
+                    btnDeleteProfile.setEnabled(false);
+                }
             }
         });
         
