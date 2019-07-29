@@ -284,9 +284,6 @@ public class ExportTestArtifactDialog extends Dialog {
                     TestCaseEntity[] testCaseEntities = PlatformUtil.getUIService(DialogActionService.class)
                             .showTestCaseSelectionDialog(activeShell, "Select test cases");
                     selectedTestCases.addAll(Arrays.asList(testCaseEntities));
-                    if (selectedTestCases.size() > 0) {
-                        btnDeleteTestCase.setEnabled(true);
-                    }
                     testCaseTableViewer.refresh();
                 } catch (PlatformException ex) {
                     MessageDialog.openError(activeShell, StringConstants.ERROR, ex.getMessage());
@@ -309,6 +306,19 @@ public class ExportTestArtifactDialog extends Dialog {
                 validateInput();
             }
         });
+        
+        testCaseTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+            @Override
+            public void selectionChanged(SelectionChangedEvent event) {
+                Object[] selections = testCaseTableViewer.getStructuredSelection().toArray();
+                if (selections != null && selections.length > 0) {
+                    btnDeleteTestCase.setEnabled(true);
+                } else {
+                    btnDeleteTestCase.setEnabled(false);
+                }
+            }
+            
+        });
 
         btnAddTestObject.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -318,9 +328,6 @@ public class ExportTestArtifactDialog extends Dialog {
                     TestObjectEntity[] testObjectEntities = PlatformUtil.getUIService(DialogActionService.class)
                             .showTestObjectSelectionDialog(activeShell, "Select test objects");
                     selectedTestObjects.addAll(Arrays.asList(testObjectEntities));
-                    if (selectedTestObjects.size() > 0) {
-                        btnDeleteTestObject.setEnabled(true);
-                    }
                     testObjectTableViewer.refresh();
                 } catch (PlatformException ex) {
                     MessageDialog.openError(activeShell, StringConstants.ERROR, ex.getMessage());
@@ -344,6 +351,18 @@ public class ExportTestArtifactDialog extends Dialog {
             }
         });
         
+        testObjectTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+            @Override
+            public void selectionChanged(SelectionChangedEvent event) {
+                Object[] selections = testObjectTableViewer.getStructuredSelection().toArray();
+                if (selections != null && selections.length > 0) {
+                    btnDeleteTestObject.setEnabled(true);
+                } else {
+                    btnDeleteTestObject.setEnabled(false);
+                }
+            }
+        });
+            
         btnAddProfile.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
