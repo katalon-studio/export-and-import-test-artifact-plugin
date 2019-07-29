@@ -10,13 +10,17 @@ public class StringConstants {
     
     public static final String DIALOG_TITLE_EXPORT_TEST_ARTIFACTS = MessageConstants.DIALOG_TITLE_EXPORT_TEST_ARTIFACTS;
     
-    public static final String LBL_SELECT_TEST_CASE = MessageConstants.LBL_SELECT_TEST_CASE;
+    public static final String LBL_TEST_CASE = MessageConstants.LBL_TEST_CASE;
     
-    public static final String LBL_SELECT_TEST_OBJECT = MessageConstants.LBL_SELECT_TEST_OBJECT;
+    public static final String LBL_TEST_OBJECT = MessageConstants.LBL_TEST_OBJECT;
+    
+    public static final String LBL_PROFILE = MessageConstants.LBL_PROFILE;
     
     public static final String COL_TEST_CASE_ID = MessageConstants.COL_TEST_CASE_ID;
     
     public static final String COL_TEST_OBJECT_ID = MessageConstants.COL_TEST_OBJECT_ID;
+    
+    public static final String COL_PROFILE_ID = MessageConstants.COL_PROFILE_ID;
 
     public static final String TOOL_ITEM_ADD = MessageConstants.TOOL_ITEM_ADD;
     
