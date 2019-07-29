@@ -16,9 +16,9 @@ public class MessageConstants {
     
     public static String DIALOG_TITLE_EXPORT_TEST_ARTIFACTS;
     
-    public static String LBL_SELECT_TEST_CASE;
+    public static String LBL_TEST_CASE;
     
-    public static String LBL_SELECT_TEST_OBJECT;
+    public static String LBL_TEST_OBJECT;
     
     public static String COL_TEST_CASE_NUMBER;
     

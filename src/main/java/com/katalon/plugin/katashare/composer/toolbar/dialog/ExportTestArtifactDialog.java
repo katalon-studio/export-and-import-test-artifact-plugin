@@ -93,8 +93,8 @@ public class ExportTestArtifactDialog extends Dialog {
     }
 
     private void createTestCaseSelectionSection(Composite parent) {
-        Label lblSelectTestCase = new Label(parent, SWT.NONE);
-        lblSelectTestCase.setText(StringConstants.LBL_SELECT_TEST_CASE);
+        Label lblTestCase = new Label(parent, SWT.NONE);
+        lblTestCase.setText(StringConstants.LBL_TEST_CASE);
 
         ToolBar toolBar = new ToolBar(parent, SWT.FLAT | SWT.WRAP | SWT.RIGHT);
         toolBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -140,8 +140,8 @@ public class ExportTestArtifactDialog extends Dialog {
     }
 
     private void createTestObjectSelectionSection(Composite parent) {
-        Label lblSelectTestObject = new Label(parent, SWT.NONE);
-        lblSelectTestObject.setText(StringConstants.LBL_SELECT_TEST_OBJECT);
+        Label lblTestObject = new Label(parent, SWT.NONE);
+        lblTestObject.setText(StringConstants.LBL_TEST_OBJECT);
 
         ToolBar toolBar = new ToolBar(parent, SWT.FLAT | SWT.WRAP | SWT.RIGHT);
         toolBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
