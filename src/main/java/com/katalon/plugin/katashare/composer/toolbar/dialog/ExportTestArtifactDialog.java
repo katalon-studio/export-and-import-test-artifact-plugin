@@ -219,7 +219,7 @@ public class ExportTestArtifactDialog extends Dialog {
         profileTableComposite.setLayoutData(gdProfileTableComposite);
         profileTableComposite.setLayout(new FillLayout());
 
-        profileTableViewer = new TableViewer(profileTableComposite, SWT.BORDER);
+        profileTableViewer = new TableViewer(profileTableComposite, SWT.BORDER | SWT.MULTI);
         profileTableViewer.setContentProvider(ArrayContentProvider.getInstance());
         Table profileTable = profileTableViewer.getTable();
         profileTable.setHeaderVisible(true);
